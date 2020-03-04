@@ -12,9 +12,6 @@ const dishRouter = require('./routes/dishRouter');
 const promoRouter = require('./routes/promoRouter');
 const leaderRouter = require('./routes/leaderRouter');
 
-//Import models
-const Dishes = require('./models/dishes')
-
 //MongoDB connection
 const url = 'mongodb://localhost:27017/conFusion'
 const connect = mongoose.connect(url)

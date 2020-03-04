@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 require('mongoose-currency').loadType(mongoose)
-const Currency = mongoose.Types.Currency
 
 let leaderSchema = new Schema({
   name: {
@@ -19,7 +18,7 @@ let leaderSchema = new Schema({
   },
   abbr: {
     type: String,
-    default: ''
+    required: true
   },
   description: {
     type: String,

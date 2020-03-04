@@ -1,6 +1,5 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const mongoose = require('mongoose-currency')
 
 const dishRouter = express.Router()
 
@@ -76,6 +75,139 @@ dishRouter.route('/:dishId')
         res.statusCode = 200
         res.setHeader('Content-Type', 'application/json')
         res.json(resp)
+      }, e => next(e))
+      .catch(e => next(e))
+  })
+
+dishRouter.route('/:dishId/comments')
+  .get((req, res, next) => {
+    Dishes.findById(req.params.dishId)
+      .then(dish => {
+        if(dish === null){
+          res.statusCode = 404
+          let err = new Error(`Dish ${req.params.dishId} not found!`)
+          return next(err)
+        }
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.json(dish.comments)
+      }, e => next(e))
+      .catch(e => next(e))
+  })
+  .post((req, res, next) => {
+    Dishes.findById(req.params.dishId)
+      .then(dish => {
+        if(dish === null){
+          res.statusCode = 404
+          let err = new Error(`Dish ${req.params.dishId} not found!`)
+          return next(err)
+        }
+        dish.comments.push(req.body)
+        dish.save()
+          .then(dish=>{
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json')
+            res.json(dish)
+          })
+      }, e => next(e))
+      .catch(e => next(e))
+  })
+  .put((req, res) => {
+    res.statusCode = 403
+    res.end('PUT operation not supported on /dishes/'+req.params.dishId+'/comments')
+  })
+  .delete((req, res, next) => {
+    Dishes.findById(req.params.dishId)
+      .then(dish => {
+        if(dish === null){
+          res.statusCode = 404
+          let err = new Error(`Dish ${req.params.dishId} not found!`)
+          return next(err)
+        }
+        for(let i = dish.comments.length - 1; i >= 0 ; i--){
+          dish.comments.id(dish.comments[i]._id).remove()
+        }
+        dish.save()
+          .then(dish=>{
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json')
+            res.json(dish)
+          }, e => next(e))
+      }, e => next(e))
+      .catch(e => next(e))
+  })
+dishRouter.route('/:dishId/comments/:commentId')
+  .get((req, res, next) => {
+    Dishes.findById(req.params.dishId)
+      .then(dish => {
+        if(dish === null || dish.comments.id(req.params.commentId) === null){
+          res.statusCode = 404
+          let err = ''
+          if(dish === null){
+            err = new Error(`Dish ${req.params.dishId} not found!`)
+          }else{
+            err = new Error(`Comment ${req.params.commentId} not found!`)
+          }
+          return next(err)
+        }
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.json(dish.comments.id(req.params.commentId))
+      }, e => next(e))
+      .catch(e => next(e))
+  })
+  .post((req, res) => {
+    res.statusCode = 403
+    res.end(`POST operation not supported on /dishes/${req.params.dishId}/comments/${req.params.commentId}`)
+  })
+  .put((req, res, next) => {
+    Dishes.findById(req.params.dishId)
+      .then(dish => {
+        if(dish === null || dish.comments.id(req.params.commentId) === null){
+          res.statusCode = 404
+          let err = ''
+          if(dish === null){
+            err = new Error(`Dish ${req.params.dishId} not found!`)
+          }else{
+            err = new Error(`Comment ${req.params.commentId} not found!`)
+          }
+          return next(err)
+        }
+        if (req.body.rating){
+          dish.comments.id(req.params.commentId).rating = req.body.rating
+        }
+        if (req.body.comment){
+          dish.comments.id(req.params.commentId).comment = req.body.comment
+        }
+        dish.save()
+          .then(dish=>{
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json')
+            res.json(dish)
+          }, e => next(e))
+      }, e => next(e))
+      .catch(e => next(e))
+  })
+  .delete((req, res) => {
+    Dishes.findById(req.params.dishId)
+      .then(dish => {
+        if(dish === null || dish.comments.id(req.params.commentId) === null){
+          res.statusCode = 404
+          let err = ''
+          if(dish === null){
+            err = new Error(`Dish ${req.params.dishId} not found!`)
+          }else{
+            err = new Error(`Comment ${req.params.commentId} not found!`)
+          }
+          return next(err)
+        }
+        dish.comments.id(req.params.commentId).remove()
+        dish.save()
+          .then(dish=>{
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json')
+            res.json(dish)
+          }, e => next(e))
       }, e => next(e))
       .catch(e => next(e))
   })

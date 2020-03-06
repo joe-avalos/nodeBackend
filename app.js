@@ -4,6 +4,8 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose')
+const sessh = require('express-session')
+const fileStore = require('session-file-store')(sessh)
 
 //Import Routers
 const indexRouter = require('./routes/index');
@@ -29,13 +31,20 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser('notSoSecret'))
+//app.use(cookieParser('notSoSecret'))
 
-app.use(cookieParser());
+app.use(sessh({
+  store: new fileStore,
+  name: 'session-id',
+  secret: 'notSoSecret',
+  saveUninitialized: false,
+  resave: false,
+}))
+
 function auth(req, res, next){
-  console.log(req.signedCookies)
+  console.log(req.session)
   
-  if (!req.signedCookies.user){
+  if (!req.session.user){
     let authHeader = req.headers.authorization
     if (!authHeader) {
       let err = new Error('You are not authenticated')
@@ -48,7 +57,7 @@ function auth(req, res, next){
     let password = authStr[1]
   
     if (username === 'admin' && password === 'password') {
-      res.cookie('user','admin',{signed: true})
+      req.session.user = 'admin'
       next()
     } else {
       let err = new Error('Wrong user/password')
@@ -57,7 +66,7 @@ function auth(req, res, next){
       return next(err)
     }
   }else{
-    if (req.signedCookies.user === 'admin') {
+    if (req.session.user === 'admin') {
       next()
     }else{
       let err = new Error('You are not authenticated')

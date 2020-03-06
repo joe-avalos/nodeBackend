@@ -6,6 +6,8 @@ const logger = require('morgan');
 const mongoose = require('mongoose')
 const session = require('express-session')
 const fileStore = require('session-file-store')(session)
+const passport = require('passport')
+const authenticate = require('./authenticate')
 
 //Import Routers
 const indexRouter = require('./routes/index');
@@ -41,6 +43,9 @@ app.use(session({
   resave: false,
 }))
 
+app.use(passport.initialize())
+app.use(passport.session())
+
 //No-auth routes
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -48,26 +53,18 @@ app.use('/users', usersRouter);
 function auth(req, res, next) {
   console.log(req.session)
   
-  if (!req.session.user) {
+  if (!req.user) {
     let err = new Error('You are not authenticated')
-    res.setHeader('WWW-Authenticate', 'Basic')
     err.status = 401
     return next(err)
   } else {
-    if (req.session.user === 'authenticated') {
-      next()
-    } else {
-      let err = new Error('You are not authenticated')
-      err.status = 401
-      return next(err)
-    }
+    next()
   }
 }
 
 app.use(auth)
 
 app.use(express.static(path.join(__dirname, 'public')))
-
 
 //Routes
 app.use('/dishes', dishRouter);

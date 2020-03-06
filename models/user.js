@@ -1,17 +1,9 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 require('mongoose-currency').loadType(mongoose)
+const passportLocalMongoose = require('passport-local-mongoose')
 
 let userSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
   admin: {
     type: Boolean,
     default: false
@@ -19,6 +11,8 @@ let userSchema = new Schema({
 }, {
   timestamps: true
 });
+
+userSchema.plugin(passportLocalMongoose)
 
 let User = mongoose.model('User', userSchema)
 

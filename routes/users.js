@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const passport = require('passport')
+const authenticate = require('../authenticate')
 
 const router = express.Router()
 
@@ -21,15 +22,25 @@ router.post('/signup', (req, res) => {
         res.statusCode = 500
         res.json({err: err})
       } else {
-        passport.authenticate('local')(req, res, () => {
-          res.json({success: true, status: 'Registration successful!'})
+        if (req.body.firstname) user.firstname = req.body.firstname
+        if (req.body.lastname) user.lastname = req.body.lastname
+        user.save((err,user)=>{
+          if (err) {
+            res.statusCode = 500
+            res.json({err: err})
+            return
+          }
+          passport.authenticate('local')(req, res, () => {
+            res.json({success: true, status: 'Registration successful!'})
+          })
         })
       }
     })
 })
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
-  res.json({success: true, status: 'Login successful!'})
+  const token = authenticate.getToken({_id:req.user._id})
+  res.json({success: true, token: token, status: 'Login successful!'})
 })
 
 router.get('/logout', (req, res, next) => {

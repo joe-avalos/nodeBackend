@@ -4,78 +4,52 @@ const bodyParser = require('body-parser')
 const promoRouter = express.Router()
 
 const Promotions = require('../models/promotions')
+const authenticate = require('../authenticate')
 
 promoRouter.use(bodyParser.json())
 
 promoRouter.route('/')
   .get((req, res, next) => {
-    Promotions.find({}).then(promos => {
-      res.statusCode = 200
-      res.setHeader('Content-Type', 'application/json')
-      res.json(promos)
-    }, e => next(e))
+    Promotions.find({}).then(promos => res.json(promos), e => next(e))
       .catch(e => next(e))
   })
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     Promotions.create(req.body)
-      .then(promo => {
-        console.log('Promotion created: ', promo)
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        res.json(promo)
-      }, e => next(e))
+      .then(promo => res.json(promo), e => next(e))
       .catch(e => next(e))
   })
-  .put((req, res) => {
+  .put(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403
     res.end('PUT operation not supported on /promotions')
   })
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Promotions.remove({})
-      .then(resp => {
-        console.log('Promotions deleted')
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        res.json(resp)
-      }, e => next(e))
+      .then(resp => res.json(resp), e => next(e))
       .catch(e => next(e))
   })
 promoRouter.route('/:promoId')
   .get((req, res, next) => {
     Promotions.findById(req.params.promoId)
-      .then(promo => {
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        res.json(promo)
-      }, e => next(e))
+      .then(promo => res.json(promo), e => next(e))
       .catch(e => next(e))
   })
-  .post((req, res) => {
+  .post(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403
     res.end(`POST operation not supported on /promotions/${req.params.promoId}`)
   })
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     Promotions.findByIdAndUpdate(req.params.promoId, {
         $set: req.body
       }, {
         new: true
       }
     )
-      .then(promo => {
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        res.json(promo)
-      }, e => next(e))
+      .then(promo => res.json(promo), e => next(e))
       .catch(e => next(e))
   })
-  .delete((req, res) => {
+  .delete(authenticate.verifyUser, (req, res) => {
     Promotions.findByIdAndRemove(req.params.promoId)
-      .then(resp => {
-        console.log('Promotion deleted')
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        res.json(resp)
-      }, e => next(e))
+      .then(resp => res.json(resp), e => next(e))
       .catch(e => next(e))
   })
 

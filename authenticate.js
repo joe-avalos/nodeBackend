@@ -33,7 +33,6 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts, (jwt_payload, done)=>{
 exports.verifyUser = passport.authenticate('jwt', {session: false})
 
 exports.verifyAdmin = (req, res, next) =>{
-  console.log(req.user)
   if (!req.user.admin) return res.status(403).send('Access denied!')
   next()
 }

@@ -14,7 +14,7 @@ dishRouter.route('/')
       .populate('comments.author')
       .then(dishes => res.json(dishes), e => next(e))
   })
-  .post(authenticate.verifyUser, (req, res, next) => {
+  .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dishes.create(req.body)
       .then(dish => res.json(dish), e => next(e))
   })
@@ -22,7 +22,7 @@ dishRouter.route('/')
     res.statusCode = 403
     res.end('PUT operation not supported on /dishes')
   })
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin,  (req, res, next) => {
     Dishes.remove({})
       .then(resp => res.json(resp), e => next(e))
   })
@@ -37,7 +37,7 @@ dishRouter.route('/:dishId')
     res.statusCode = 403
     res.end(`POST operation not supported on /dishes/${req.params.dishId}`)
   })
-  .put(authenticate.verifyUser, (req, res, next) => {
+  .put(authenticate.verifyUser, authenticate.verifyAdmin,  (req, res, next) => {
     Dishes.findByIdAndUpdate(req.params.dishId, {
         $set: req.body
       }, {
@@ -46,7 +46,7 @@ dishRouter.route('/:dishId')
     )
       .then(dish => res.json(dish), e => next(e))
   })
-  .delete(authenticate.verifyUser, (req, res) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin,  (req, res) => {
     Dishes.findByIdAndRemove(req.params.dishId)
       .then(resp => res.json(resp), e => next(e))
   })
@@ -86,7 +86,7 @@ dishRouter.route('/:dishId/comments')
     res.statusCode = 403
     res.end('PUT operation not supported on /dishes/' + req.params.dishId + '/comments')
   })
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dishes.findById(req.params.dishId)
       .then(dish => {
         if (dish === null) {
@@ -137,6 +137,11 @@ dishRouter.route('/:dishId/comments/:commentId')
           }
           return next(err)
         }
+        if(!dish.comments.id(req.params.commentId).author._id.equals(req.user._id)){
+          res.statusCode = 403
+          let err = new Error(`You do not own comment ${req.params.commentId}!`)
+          return next(err)
+        }
         if (req.body.rating) {
           dish.comments.id(req.params.commentId).rating = req.body.rating
         }
@@ -152,7 +157,7 @@ dishRouter.route('/:dishId/comments/:commentId')
       }, e => next(e))
       .catch(e => next(e))
   })
-  .delete(authenticate.verifyUser, (req, res) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Dishes.findById(req.params.dishId)
       .then(dish => {
         if (dish === null || dish.comments.id(req.params.commentId) === null) {
@@ -163,6 +168,11 @@ dishRouter.route('/:dishId/comments/:commentId')
           } else {
             err = new Error(`Comment ${req.params.commentId} not found!`)
           }
+          return next(err)
+        }
+        if(!dish.comments.id(req.params.commentId).author._id.equals(req.user._id)){
+          res.statusCode = 403
+          let err = new Error(`You do not own comment ${req.params.commentId}!`)
           return next(err)
         }
         dish.comments.id(req.params.commentId).remove()

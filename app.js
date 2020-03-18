@@ -1,13 +1,11 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const createError = require('http-errors')
+const express = require('express')
+const path = require('path')
+const logger = require('morgan')
 const mongoose = require('mongoose')
 const session = require('express-session')
 const fileStore = require('session-file-store')(session)
 const passport = require('passport')
-const authenticate = require('./authenticate')
 const config = require('./config')
 
 //Import Routers
@@ -19,7 +17,7 @@ const leaderRouter = require('./routes/leaderRouter');
 
 //MongoDB connection
 const connect = mongoose.connect(config.mongoUrl)
-connect.then(db => {
+connect.then(() => {
   console.log('Connected!')
 })
   .catch(e => console.log(e))

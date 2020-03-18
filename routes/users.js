@@ -39,7 +39,7 @@ router.post('/signup', (req, res) => {
 })
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
-  const token = authenticate.getToken({_id:req.user._id})
+  const token = authenticate.getToken({_id: req.user._id})
   res.json({success: true, token: token, status: 'Login successful!'})
 })
 

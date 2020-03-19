@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const passport = require('passport')
 const authenticate = require('../authenticate')
+const cors = require('./cors')
 
 const router = express.Router()
 
@@ -9,12 +10,12 @@ const User = require('../models/user')
 
 router.use(bodyParser.json())
 /* GET users listing. */
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function (req, res) {
+router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, function (req, res) {
   User.find({})
-    .then(users=>res.json(users), e => next(e))
+    .then(users => res.json(users), e => next(e))
 });
 
-router.post('/signup', (req, res) => {
+router.post('/signup', cors.corsWithOptions, (req, res) => {
   User.register(
     new User({username: req.body.username}),
     req.body.password,
@@ -25,7 +26,7 @@ router.post('/signup', (req, res) => {
       } else {
         if (req.body.firstname) user.firstname = req.body.firstname
         if (req.body.lastname) user.lastname = req.body.lastname
-        user.save((err,user)=>{
+        user.save((err, user) => {
           if (err) {
             res.statusCode = 500
             res.json({err: err})
@@ -39,7 +40,7 @@ router.post('/signup', (req, res) => {
     })
 })
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
   const token = authenticate.getToken({_id: req.user._id})
   res.json({success: true, token: token, status: 'Login successful!'})
 })

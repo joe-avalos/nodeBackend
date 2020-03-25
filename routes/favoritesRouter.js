@@ -13,7 +13,7 @@ favoritesRouter.use(bodyParser.json())
 favoritesRouter.route('/')
   .options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
   .get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    Favorites.findOne({user: req.user._id}).populate('dishes').then(favs => res.json(favs), e => next(e))
+    Favorites.findOne({user: req.user._id}).populate('dishes user').then(favs => res.json(favs), e => next(e))
   })
   .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Favorites.findOne({user: req.user._id})

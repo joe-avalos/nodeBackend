@@ -9,12 +9,13 @@ const passport = require('passport')
 const config = require('./config')
 
 //Import Routers
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const dishRouter = require('./routes/dishRouter');
-const promoRouter = require('./routes/promoRouter');
-const leaderRouter = require('./routes/leaderRouter');
-const uploadRouter = require('./routes/uploadRouter');
+const indexRouter = require('./routes/index')
+const usersRouter = require('./routes/users')
+const dishRouter = require('./routes/dishRouter')
+const promoRouter = require('./routes/promoRouter')
+const leaderRouter = require('./routes/leaderRouter')
+const uploadRouter = require('./routes/uploadRouter')
+const favoritesRouter = require('./routes/favoritesRouter')
 
 //MongoDB connection
 const connect = mongoose.connect(config.mongoUrl)
@@ -59,10 +60,11 @@ app.use('/users', usersRouter);
 app.use(express.static(path.join(__dirname, 'public')))
 
 //Routes
-app.use('/dishes', dishRouter);
-app.use('/promotions', promoRouter);
-app.use('/leaders', leaderRouter);
-app.use('/imageUpload', uploadRouter);
+app.use('/dishes', dishRouter)
+app.use('/promotions', promoRouter)
+app.use('/leaders', leaderRouter)
+app.use('/favorites', favoritesRouter)
+app.use('/imageUpload', uploadRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

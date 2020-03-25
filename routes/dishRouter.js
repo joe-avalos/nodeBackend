@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 
 const dishRouter = express.Router()
 
-const Dishes = require('../models/dishes')
+const {Dishes} = require('../models/dishes')
 const authenticate = require('../authenticate')
 const cors = require('./cors')
 
@@ -12,6 +12,7 @@ dishRouter.use(bodyParser.json())
 dishRouter.route('/')
   .options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
   .get(cors.cors, (req, res, next) => {
+    console.log('')
     Dishes.find({})
       .populate('comments.author')
       .then(dishes => res.json(dishes), e => next(e))
